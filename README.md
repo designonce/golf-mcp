@@ -70,9 +70,14 @@ golf run part.py --label first
 golf render
 ```
 
-`golf init` writes `golf_project.json`, a skill for agents in `.claude/skills/golf-cad/` and a
-section in `AGENTS.md`. `golf docs` lists the documentation, and `golf docs <section>` prints a
-section.
+`golf init` writes `golf_project.json`, the skills for agents and a section in `AGENTS.md` that lists
+them. The skills go in `.agents/skills/`: `golf-cad` (modelling), `golf-review` (reviewing a design)
+and `golf-report` (a report page with a 3D walkthrough). If the project has a `.claude/` folder,
+each skill is also linked into `.claude/skills/` for Claude Code. `--skills-dir` writes them to
+another folder.
+
+`golf docs` lists the documentation, and `golf docs <section>` prints a section as markdown.
+`golf export glb` writes `assembly.glb`, every part in one file, as well as a file for each part.
 
 ## Use as an MCP server
 
