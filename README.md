@@ -1,7 +1,7 @@
 # golf-mcp releases
 
 This repository holds the published wheels of `golf-mcp`. `golf-mcp` runs golf CAD scripts in Python
-for an agent. It is an MCP server and a command line with the same commands.
+for an agent. It is a command line, `golf`, and an MCP server with the same commands.
 
 Each release has two kinds of wheel:
 
@@ -12,6 +12,23 @@ Each release has two kinds of wheel:
 The launcher lists each platform wheel with its release URL and an environment marker. pip and uv
 download only the wheel for your platform.
 
+## Versions
+
+A release's tag and its wheels write a prerelease version differently:
+
+| Release    | Tag           | Version in the wheel names |
+| ---------- | ------------- | -------------------------- |
+| 0.1.0-rc.1 | `v0.1.0-rc.1` | `0.1.0rc1`                 |
+| 1.0.0      | `v1.0.0`      | `1.0.0`                    |
+
+The examples below use the launcher wheel of `v0.1.0-rc.1`:
+
+```
+https://github.com/designonce/golf-mcp/releases/download/v0.1.0-rc.1/golf_mcp-0.1.0rc1-py3-none-any.whl
+```
+
+For another release, copy the URL of its `golf_mcp-…-py3-none-any.whl` from the release's assets.
+
 ## Platforms
 
 | Platform       | Wheel tag               |
@@ -21,25 +38,47 @@ download only the wheel for your platform.
 
 Python 3.11 or newer is necessary.
 
-## Run with uv
+## Install
 
-Use the URL of the launcher wheel of an exact release:
+Install `golf` as a command with uv:
 
 ```sh
-uvx --from https://github.com/designonce/golf-mcp/releases/download/v<version>/golf_mcp-<version>-py3-none-any.whl golf --help
+uv tool install https://github.com/designonce/golf-mcp/releases/download/v0.1.0-rc.1/golf_mcp-0.1.0rc1-py3-none-any.whl
+```
+
+Or with pip, into the active environment:
+
+```sh
+pip install https://github.com/designonce/golf-mcp/releases/download/v0.1.0-rc.1/golf_mcp-0.1.0rc1-py3-none-any.whl
+```
+
+To run it once without installing it, use `uvx --from <URL> golf`:
+
+```sh
+uvx --from https://github.com/designonce/golf-mcp/releases/download/v0.1.0-rc.1/golf_mcp-0.1.0rc1-py3-none-any.whl golf --help
 ```
 
 Do not use `uvx --with <wheel> golf`. That command gets a package named `golf` from PyPI.
 
-To start a project in the current folder and run a script:
+## Use
+
+Start a project in the current folder, then run a script and draw its parts:
 
 ```sh
 golf init
-golf run part.py
+golf run part.py --label first
 golf render
 ```
 
+`golf init` writes `golf_project.json`, a skill for agents in `.claude/skills/golf-cad/` and a
+section in `AGENTS.md`. `golf docs` lists the documentation, and `golf docs <section>` prints a
+section.
+
 ## Use as an MCP server
+
+The MCP server keeps the current parts loaded between commands. It is useful when an agent runs many
+versions of a design. For Claude Code, put this in `.mcp.json` at the project's root. Other clients
+take the same `mcpServers` entry in their MCP settings.
 
 ```json
 {
@@ -48,7 +87,7 @@ golf render
       "command": "uvx",
       "args": [
         "--from",
-        "https://github.com/designonce/golf-mcp/releases/download/v<version>/golf_mcp-<version>-py3-none-any.whl",
+        "https://github.com/designonce/golf-mcp/releases/download/v0.1.0-rc.1/golf_mcp-0.1.0rc1-py3-none-any.whl",
         "golf",
         "serve"
       ]
@@ -57,8 +96,4 @@ golf render
 }
 ```
 
-## Install with pip
-
-```sh
-pip install https://github.com/designonce/golf-mcp/releases/download/v<version>/golf_mcp-<version>-py3-none-any.whl
-```
+If `golf` is installed, use `"command": "golf"` and `"args": ["serve"]`.
