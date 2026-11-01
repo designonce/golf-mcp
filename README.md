@@ -12,22 +12,19 @@ Each release has two kinds of wheel:
 The launcher lists each platform wheel with its release URL and an environment marker. pip and uv
 download only the wheel for your platform.
 
-## Versions
+## Latest release
 
-A release's tag and its wheels write a prerelease version differently:
+Read [latest.json](https://github.com/designonce/golf-mcp/releases/download/latest/latest.json)
+for the latest published version, including release candidates. This stable URL is updated when a
+release is published. The manifest includes:
 
-| Release    | Tag           | Version in the wheel names |
-| ---------- | ------------- | -------------------------- |
-| 0.1.0-rc.1 | `v0.1.0-rc.1` | `0.1.0rc1`                 |
-| 1.0.0      | `v1.0.0`      | `1.0.0`                    |
+- `version` and `tag`: the release version and GitHub tag.
+- `launcher`: the launcher wheel URL to use with uv or pip.
+- `wheels`: all wheel URLs for that release.
+- `install`: ready-to-run installation commands.
 
-The examples below use the launcher wheel of `v0.1.0-rc.1`:
-
-```
-https://github.com/designonce/golf-mcp/releases/download/v0.1.0-rc.1/golf_mcp-0.1.0rc1-py3-none-any.whl
-```
-
-For another release, copy the URL of its `golf_mcp-…-py3-none-any.whl` from the release's assets.
+Use the manifest instead of copying a version-pinned URL from an old example. To pin a particular
+release, keep its `launcher` URL; the platform dependencies will come from that same release.
 
 ## Platforms
 
@@ -40,23 +37,37 @@ Python 3.11 or newer is necessary.
 
 ## Install
 
+First resolve the latest launcher URL (POSIX shell; Python 3.11+ is required):
+
+```sh
+golf_wheel_url="$(python3 -c 'import json, urllib.request; print(json.load(urllib.request.urlopen("https://github.com/designonce/golf-mcp/releases/download/latest/latest.json"))["launcher"])')"
+```
+
 Install `golf` as a command with uv:
 
 ```sh
-uv tool install https://github.com/designonce/golf-mcp/releases/download/v0.1.0-rc.1/golf_mcp-0.1.0rc1-py3-none-any.whl
+uv tool install "$golf_wheel_url"
+```
+
+To replace an existing tool installation with the latest release:
+
+```sh
+uv tool install --force "$golf_wheel_url"
 ```
 
 Or with pip, into the active environment:
 
 ```sh
-pip install https://github.com/designonce/golf-mcp/releases/download/v0.1.0-rc.1/golf_mcp-0.1.0rc1-py3-none-any.whl
+python3 -m pip install --upgrade "$golf_wheel_url"
 ```
 
 To run it once without installing it, use `uvx --from <URL> golf`:
 
 ```sh
-uvx --from https://github.com/designonce/golf-mcp/releases/download/v0.1.0-rc.1/golf_mcp-0.1.0rc1-py3-none-any.whl golf --help
+uvx --from "$golf_wheel_url" golf --help
 ```
+
+On Windows, open `latest.json` and use its `launcher` URL directly in the same uv or pip command.
 
 Do not use `uvx --with <wheel> golf`. That command gets a package named `golf` from PyPI.
 
@@ -89,16 +100,17 @@ take the same `mcpServers` entry in their MCP settings.
 {
   "mcpServers": {
     "golf": {
-      "command": "uvx",
-      "args": [
-        "--from",
-        "https://github.com/designonce/golf-mcp/releases/download/v0.1.0-rc.1/golf_mcp-0.1.0rc1-py3-none-any.whl",
-        "golf",
-        "serve"
-      ]
+      "command": "golf",
+      "args": ["serve"]
     }
   }
 }
 ```
 
-If `golf` is installed, use `"command": "golf"` and `"args": ["serve"]`.
+This uses the `golf` command installed above. Refresh its installation from `latest.json` when
+upgrading.
+
+For a uvx-based configuration, use `"command": "uvx"` and
+`"args": ["--from", "<launcher URL from latest.json>", "golf", "serve"]`. Replace the placeholder
+with the manifest's actual `launcher` URL and refresh it when upgrading. MCP settings do not expand
+shell variables such as `$golf_wheel_url`.
